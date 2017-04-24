@@ -1,0 +1,19 @@
+########################################################################
+# odr dab stream router
+########################################################################
+[program:router-{{route.name}}]
+priority=300
+directory=/root/
+command=/usr/local/bin/odroute run
+{% for port in route.input_ports %}    -s {{ port }}
+{% endfor %}
+{% for output in route.outputs %}    -o {{ output }}
+{% endfor %}
+    -d 1.5
+user=root
+startretries=120
+autostart=true
+autorestart=true
+redirect_stderr=True
+loglevel=info
+stdout_logfile=syslog

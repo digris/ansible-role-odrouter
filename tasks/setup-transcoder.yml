@@ -1,0 +1,14 @@
+---
+
+#- debug: msg="transcoder {{ route }}"
+
+- name: ensure meta directory exists
+  file: path=/home/odr/transcoder/{{route.name}}/meta/slides state=directory
+
+- name: add default dls file
+  template: src=dls.txt.j2
+            dest='/home/odr/transcoder/{{route.name}}/meta/dls.txt'
+
+- name: Add supervisord config
+  template: src=supervisor.transcoder.conf.j2
+            dest='/etc/supervisor/conf.d/transcoder-{{route.name}}.conf'

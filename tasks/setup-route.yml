@@ -1,0 +1,7 @@
+---
+
+#- debug: msg="route {{ route }}"
+
+- name: Add supervisord config
+  template: src=supervisor.router.conf.j2
+            dest='/etc/supervisor/conf.d/router-{{route.name}}.conf'

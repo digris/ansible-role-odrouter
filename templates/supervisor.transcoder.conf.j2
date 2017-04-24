@@ -1,0 +1,47 @@
+########################################################################
+# odr webstream to dab transcoder
+########################################################################
+[group:transcoder-{{route.name}}]
+programs=audioenc-{{route.name}},padenc-{{route.name}}
+priority=101
+
+########################################################################
+# dab encoder
+########################################################################
+[program:audioenc-{{route.name}}]
+directory=/home/odr/transcoder/{{route.name}}
+command=/usr/local/bin/odr-audioenc
+    -v {{ route.transcoder_webstream }}
+    -r 32000
+    -c 2
+    -o tcp://localhost:{{ route.transcoder_port }}
+    -b {{ route.bitrate }}
+    -p 58
+    -P pad.fifo
+user=root
+startretries=120
+autostart=true
+autorestart=true
+redirect_stderr=True
+loglevel=info
+stdout_logfile=syslog
+
+########################################################################
+# mot encoder
+########################################################################
+[program:padenc-{{route.name}}]
+directory=/home/odr/transcoder/{{route.name}}
+command=/usr/local/bin/odr-padenc
+    --pad 58
+    --remove-dls
+    --dir meta/slides
+    --sleep 5
+    --dls meta/dls.txt
+    --output pad.fifo
+user=root
+startretries=120
+autostart=true
+autorestart=true
+redirect_stderr=True
+loglevel=info
+stdout_logfile=syslog

@@ -1,0 +1,55 @@
+---
+
+# required packages
+- name: ensure dependencies are installed
+  apt: 'pkg={{ item }} state=present'
+  with_items:
+   - supervisor
+  changed_when: False
+  become: yes
+  become_user: root
+
+
+# install odr-stream-router from github
+- name: install odr-stream-router from github
+  pip: name='git+https://github.com/digris/odr-stream-router.git#egg=odr-stream-router' editable=true
+
+# remove supervicor entries (router)
+- name: remove supervicor entries (router)
+  shell: rm /etc/supervisor/conf.d/router-*
+  tags: router
+  changed_when: false
+  ignore_errors: yes
+
+# install routes
+- name: install routes
+  include: setup-route.yml route={{item.route}}
+  tags: router
+  with_items:
+    - '{{ router_routes }}'
+
+
+# remove supervicor entries (transcoder)
+- name: remove supervicor entries (transcoder)
+  shell: rm /etc/supervisor/conf.d/transcoder-*
+  tags: transcoder
+  changed_when: false
+  ignore_errors: yes
+
+# install transcoders
+- name: install transcoders
+  include: setup-transcoder.yml route={{item.route}}
+  tags: transcoder
+  with_items:
+    - '{{ router_routes }}'
+
+
+- name: reread supervisor config
+  shell: supervisorctl reread
+  tags: transcoder,router
+  changed_when: false
+
+- name: update supervisor config
+  shell: supervisorctl update
+  tags: transcoder,router
+  changed_when: false
